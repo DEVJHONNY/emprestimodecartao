@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Empréstimos de Cartão</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <style>
+        :root {
+            --bg: #f7f7f7;
+            --container-bg: #fff;
+            --primary: #2a4d69;
+            --secondary: #4b86b4;
+            --danger: #c0392b;
+            --success: #27ae60;
+            --border: #b0b0b0;
+            --input-bg: #fff;
+            --emprestimo-bg: #f4faff;
+            --limite: #1565c0;
+            --text: #222;
+        }
+        body.dark {
+            --bg: #181c23;
+            --container-bg: #232a34;
+            --primary: #7eb6ff;
+            --secondary: #4b86b4;
+            --danger: #ff7675;
+            --success: #00b894;
+            --border: #444;
+            --input-bg: #232a34;
+            --emprestimo-bg: #232a34;
+            --limite: #81ecec;
+            --text: #f7f7f7;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.2s, color 0.2s;
+            font-size: 1.08em;
+        }
+        .container {
+            max-width: 520px;
+            width: 100vw;
+            margin: 0 auto;
+            background: var(--container-bg);
+            border-radius: 0;
+            box-shadow: none;
+            padding: 12px 0 24px 0;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+        h2 {
+            color: var(--secondary);
+            margin-top: 24px;
+            margin-bottom: 10px;
+            font-size: 1.15em;
+        }
+        form {
+            margin-bottom: 18px;
+            padding: 0 4vw;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        input, button, textarea, select {
+            width: 100%;
+            margin-top: 4px;
+            margin-bottom: 12px;
+            padding: 13px 10px;
+            border-radius: 7px;
+            border: 1px solid var(--border);
+            font-size: 1.08em;
+            box-sizing: border-box;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        button {
+            background: var(--primary);
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 1.08em;
+            min-height: 48px;
+        }
+        button:hover, button:active {
+            background: var(--secondary);
+        }
+        .emprestimo {
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            background: var(--emprestimo-bg);
+            border-radius: 6px;
+            padding-left: 8px;
+            position: relative;
+            font-size: 1em;
+        }
+        .emprestimo:last-child {
+            border-bottom: none;
+        }
+        .erro {
+            color: var(--danger);
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1.08em;
+        }
+        .sucesso {
+            color: var (--success);
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1.08em;
+        }
+        .limite {
+            color: var(--limite);
+            font-weight: bold;
+        }
+        .botoes {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .botoes button {
+            flex: 1 1 40%;
+            min-width: 120px;
+        }
+        .botoes-emprestimo {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .botoes-emprestimo button {
+            min-width: 90px;
+            font-size: 0.98em;
+            padding: 10px 0;
+        }
+        .btn-remover {
+            background: var(--danger);
+        }
+        .btn-editar {
+            background: var(--secondary);
+        }
+        .btn-status {
+            background: var(--success);
+        }
+        .btn-status.pendente {
+            background: var(--danger);
+        }
+        .alerta {
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.95em;
+            margin-left: 6px;
+        }
+        .filtro-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            padding: 0 4vw;
+        }
+        .filtro-bar input, .filtro-bar select {
+            min-width: 120px;
+            font-size: 1em;
+            padding: 10px 8px;
+        }
+        .tema-btn {
+            width: auto;
+            margin: 0 0 10px 0;
+            padding: 10px 18px;
+            background: var(--secondary);
+            font-size: 1.08em;
+        }
+        #grafico {
+            padding: 0 4vw;
+        }
+        #listaEmprestimos {
+            padding: 0 4vw;
+        }
+        #mensagem {
+            padding: 0 4vw;
+        }
+        #ajudaModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #0008;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        #ajudaModal > div {
+            background: #fff;
+            color: #222;
+            max-width: 96vw;
+            width: 96vw;
+            padding: 18px 8px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0002;
+            position: relative;
+            font-size: 1em;
+        }
+        #ajudaModal button {
+            min-width: unset;
+            padding: 0 8px;
+            font-size: 1.2em;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 0; border-radius: 0; }
+            h1 { font-size: 1.2em; }
+            h2 { font-size: 1em; }
+            .botoes button { min-width: 90px; font-size: 1em; }
+            .botoes-emprestimo button { min-width: 70px; font-size: 0.95em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="tema-btn" id="temaBtn" type="button">🌙 Tema escuro</button>
+        <h1>Empréstimos de Cartão</h1>
+        <h2>Registrar novo empréstimo</h2>
+        <form id="formEmprestimo" autocomplete="off">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" maxlength="40" required placeholder="Nome completo">
+
+            <label for="data_saida">Data de saída do cartão</label>
+            <input type="text" id="data_saida" maxlength="10" required placeholder="DD/MM/AAAA" pattern="\d{2}/\d{2}/\d{4}">
+
+            <label for="data_devolucao">Data de devolução do cartão</label>
+            <input type="text" id="data_devolucao" maxlength="10" required placeholder="DD/MM/AAAA" pattern="\d{2}/\d{2}/\d{4}">
+
+            <label for="limite_usado">Limite usado (R$)</label>
+            <input type="number" step="0.01" min="0" id="limite_usado" required placeholder="Ex: 150.00">
+
+            <label for="observacoes">Observações</label>
+            <textarea id="observacoes" maxlength="120" placeholder="Observações adicionais"></textarea>
+
+            <div class="botoes">
+                <button type="submit">Registrar</button>
+                <button type="button" id="limparLista" style="background:#c0392b;">Limpar Lista</button>
+                <button type="button" id="exportarXLS" style="background:#388e3c;">Exportar XLS</button>
+                <button type="button" id="exportarPDF" style="background:#6d4c41;">Exportar PDF</button>
+                <button type="button" id="ajuda" style="background:#0097a7;">Ajuda</button>
+            </div>
+        </form>
+        <div class="filtro-bar">
+            <input type="text" id="filtroNome" placeholder="Buscar por nome...">
+            <select id="ordenarPor">
+                <option value="data_saida">Ordenar por Data de Saída</option>
+                <option value="nome">Ordenar por Nome</option>
+            </select>
+            <select id="idioma">
+                <option value="pt">Português</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+        <div id="mensagem"></div>
+        <div id="grafico" style="margin:20px 0;"></div>
+        <h2 id="listaTitulo">Lista de Empréstimos</h2>
+        <div id="listaEmprestimos"></div>
+        <div id="ajudaModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;z-index:1000;align-items:center;justify-content:center;">
+            <div style="background:#fff;color:#222;max-width:96vw;width:96vw;padding:18px 8px;border-radius:10px;box-shadow:0 2px 8px #0002;position:relative;">
+                <button onclick="document.getElementById('ajudaModal').style.display='none'"
+                    style="
+                        position:absolute;
+                        top:8px;
+                        right:12px;
+                        font-size:1.7em;
+                        background:#fff;
+                        color:#222;
+                        border:none;
+                        border-radius:50%;
+                        box-shadow:0 2px 8px #0002;
+                        width:38px;
+                        height:38px;
+                        z-index:1100;
+                        cursor:pointer;
+                        padding:0;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                    "
+                    aria-label="Fechar ajuda"
+                >✖</button>
+                <h2>Ajuda</h2>
+                <ul style="padding-left:18px;">
+                    <li>Preencha o formulário para registrar um novo empréstimo.</li>
+                    <li>Use os botões para exportar, imprimir, fazer backup ou restaurar dados.</li>
+                    <li>Edite ou remova empréstimos individualmente.</li>
+                    <li>Use o filtro para buscar por nome e ordene como preferir.</li>
+                    <li>O gráfico mostra o total emprestado, devolvido e pendente.</li>
+                    <li>Altere o idioma no seletor acima.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Utilidades de LocalStorage
+        function salvarLocal() {
+            localStorage.setItem('emprestimos', JSON.stringify(listaEmprestimos));
+        }
+        function carregarLocal() {
+            const dados = localStorage.getItem('emprestimos');
+            return dados ? JSON.parse(dados) : [];
+        }
+
+        let listaEmprestimos = carregarLocal();
+
+        function validarData(data) {
+            if (!/^\d{2}\/\d{2}\/\d{4}$/.test(data)) return false;
+            const [dia, mes, ano] = data.split('/').map(Number);
+            const dt = new Date(ano, mes - 1, dia);
+            return dt.getFullYear() === ano && dt.getMonth() === mes - 1 && dt.getDate() === dia;
+        }
+        function dataParaDate(data) {
+            const [dia, mes, ano] = data.split('/').map(Number);
+            return new Date(ano, mes - 1, dia);
+        }
+        function validarNome(nome) {
+            return /^[A-Za-zÀ-ÿ\s]{3,}$/.test(nome);
+        }
+
+        function atualizarLista() {
+            const listaDiv = document.getElementById('listaEmprestimos');
+            let filtro = document.getElementById('filtroNome').value.trim().toLowerCase();
+            let ordenar = document.getElementById('ordenarPor').value;
+            let lista = listaEmprestimos.slice();
+
+            // Filtro
+            if (filtro) {
+                lista = lista.filter(e => e.nome.toLowerCase().includes(filtro));
+            }
+            // Ordenação
+            if (ordenar === "nome") {
+                lista.sort((a, b) => a.nome.localeCompare(b.nome));
+            } else {
+                lista.sort((a, b) => dataParaDate(a.data_saida) - dataParaDate(b.data_saida));
+            }
+
+            if (lista.length === 0) {
+                listaDiv.innerHTML = "<p>Nenhum empréstimo registrado ainda.</p>";
+                return;
+            }
+            listaDiv.innerHTML = lista.map((e, i) => {
+                // Status visual
+                let status = e.status || "Pendente";
+                let statusClass = status === "Devolvido" ? "btn-status" : "btn-status pendente";
+                let hoje = new Date();
+                hoje.setHours(0,0,0,0);
+                let devolucao = dataParaDate(e.data_devolucao);
+                let alerta = "";
+                if (status !== "Devolvido") {
+                    if (devolucao < hoje) {
+                        alerta = `<span class="alerta">Atrasado!</span>`;
+                    } else if ((devolucao - hoje) / (1000*60*60*24) <= 2) {
+                        alerta = `<span class="alerta">Devolução próxima</span>`;
+                    }
+                }
+                return `
+                <div class="emprestimo">
+                    <b>Empréstimo ${i + 1}</b><br>
+                    <b>Nome:</b> ${e.nome}<br>
+                    <b>Data de saída do cartão:</b> ${e.data_saida}<br>
+                    <b>Data de devolução do cartão:</b> ${e.data_devolucao} ${alerta}<br>
+                    <b>Limite usado:</b> <span class="limite">R$ ${parseFloat(e.limite_usado).toFixed(2)}</span><br>
+                    <b>Status:</b> <span>${status}</span><br>
+                    <b>Observações:</b> ${e.observacoes ? e.observacoes : "-"}
+                    <div class="botoes-emprestimo">
+                        <button class="btn-editar" onclick="editarEmprestimo(${i})">Editar</button>
+                        <button class="btn-remover" onclick="removerEmprestimo(${i})">Remover</button>
+                        <button class="${statusClass}" onclick="alternarStatus(${i})">${status === "Devolvido" ? "Marcar como Pendente" : "Marcar como Devolvido"}</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            atualizarGrafico();
+        }
+
+        function mostrarMensagem(msg, tipo) {
+            const div = document.getElementById('mensagem');
+            div.textContent = msg;
+            div.className = tipo;
+            setTimeout(() => { div.textContent = ""; div.className = ""; }, 2500);
+        }
+
+        // Máscara automática para datas
+        function aplicarMascaraData(input) {
+            input.addEventListener('input', function() {
+                let v = input.value.replace(/\D/g, '').slice(0,8);
+                if (v.length >= 5)
+                    input.value = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4,8);
+                else if (v.length >= 3)
+                    input.value = v.slice(0,2) + '/' + v.slice(2,4);
+                else
+                    input.value = v;
+            });
+        }
+        aplicarMascaraData(document.getElementById('data_saida'));
+        aplicarMascaraData(document.getElementById('data_devolucao'));
+
+        // Validação interativa dos campos
+        document.getElementById('nome').addEventListener('input', function() {
+            if (!validarNome(this.value.trim())) {
+                this.style.borderColor = "#c0392b";
+            } else {
+                this.style.borderColor = "#4b86b4";
+            }
+        });
+
+        document.getElementById('data_saida').addEventListener('blur', function() {
+            const valor = this.value.trim();
+            if (!validarData(valor)) {
+                this.style.borderColor = "#c0392b";
+                mostrarMensagem("Data de saída inválida!", "erro");
+            } else {
+                const hoje = new Date();
+                hoje.setHours(0,0,0,0);
+                const data = dataParaDate(valor);
+                if (data < hoje) {
+                    this.style.borderColor = "#c0392b";
+                    mostrarMensagem("Data de saída não pode ser anterior a hoje.", "erro");
+                } else {
+                    this.style.borderColor = "#4b86b4";
+                }
+            }
+        });
+
+        document.getElementById('data_devolucao').addEventListener('blur', function() {
+            const valor = this.value.trim();
+            const data_saida = document.getElementById('data_saida').value.trim();
+            if (!validarData(valor)) {
+                this.style.borderColor = "#c0392b";
+                mostrarMensagem("Data de devolução inválida!", "erro");
+            } else if (validarData(data_saida)) {
+                const d1 = dataParaDate(data_saida);
+                const d2 = dataParaDate(valor);
+                if (d2 < d1) {
+                    this.style.borderColor = "#c0392b";
+                    mostrarMensagem("Data de devolução não pode ser anterior à data de saída.", "erro");
+                } else {
+                    this.style.borderColor = "#4b86b4";
+                }
+            } else {
+                this.style.borderColor = "#4b86b4";
+            }
+        });
+
+        document.getElementById('limite_usado').addEventListener('input', function() {
+            if (parseFloat(this.value) <= 0 || isNaN(parseFloat(this.value))) {
+                this.style.borderColor = "#c0392b";
+            } else {
+                this.style.borderColor = "#4b86b4";
+            }
+        });
+
+        // Busca/filtro e ordenação
+        document.getElementById('filtroNome').addEventListener('input', atualizarLista);
+        document.getElementById('ordenarPor').addEventListener('change', atualizarLista);
+
+        // Tema claro/escuro
+        const temaBtn = document.getElementById('temaBtn');
+        temaBtn.onclick = function() {
+            document.body.classList.toggle('dark');
+            temaBtn.textContent = document.body.classList.contains('dark') ? "☀️ Tema claro" : "🌙 Tema escuro";
+        };
+
+        // Exportar XLS (Excel)
+        document.getElementById('exportarXLS').onclick = function() {
+            if (listaEmprestimos.length === 0) {
+                mostrarMensagem("Nada para exportar.", "erro");
+                return;
+            }
+            let xls = `<table border="1"><tr>
+                <th>Nome</th>
+                <th>Data Saída</th>
+                <th>Data Devolução</th>
+                <th>Limite Usado</th>
+                <th>Status</th>
+                <th>Observações</th>
+            </tr>`;
+            listaEmprestimos.forEach(e => {
+                xls += `<tr>
+                    <td>${e.nome}</td>
+                    <td>${e.data_saida}</td>
+                    <td>${e.data_devolucao}</td>
+                    <td>${parseFloat(e.limite_usado).toFixed(2)}</td>
+                    <td>${e.status || "Pendente"}</td>
+                    <td>${e.observacoes ? e.observacoes.replace(/</g, '&lt;').replace(/>/g, '&gt;') : ""}</td>
+                </tr>`;
+            });
+            xls += `</table>`;
+            // Adiciona BOM para UTF-8
+            const blob = new Blob(
+                [ '\ufeff' + xls ],
+                { type: "application/vnd.ms-excel;charset=utf-8;" }
+            );
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "emprestimos.xls";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        // Exportar PDF
+        document.getElementById('exportarPDF').onclick = function() {
+            if (listaEmprestimos.length === 0) {
+                mostrarMensagem(textos[idiomaAtual].nadaExportar, "erro");
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(textos[idiomaAtual].lista, 10, 10);
+            let y = 20;
+            listaEmprestimos.forEach((e, i) => {
+                doc.text(`${i+1}. ${e.nome} | ${e.data_saida} - ${e.data_devolucao} | R$ ${parseFloat(e.limite_usado).toFixed(2)} | ${e.status || "Pendente"}`, 10, y);
+                if (e.observacoes) doc.text(`Obs: ${e.observacoes}`, 10, y+6);
+                y += e.observacoes ? 16 : 10;
+                if (y > 270) { doc.addPage(); y = 10; }
+            });
+            doc.save("emprestimos.pdf");
+        };
+
+        // Ajuda interativa
+        document.getElementById('ajuda').onclick = function() {
+            document.getElementById('ajudaModal').style.display = "flex";
+        };
+
+        // Gráfico de uso do limite
+        function atualizarGrafico() {
+            const ctxId = "graficoCanvas";
+            let graficoDiv = document.getElementById('grafico');
+            graficoDiv.innerHTML = `<canvas id="${ctxId}" width="400" height="180" aria-label="Gráfico de uso do limite"></canvas>`;
+            let total = listaEmprestimos.reduce((s, e) => s + parseFloat(e.limite_usado), 0);
+            let devolvido = listaEmprestimos.filter(e => e.status === "Devolvido").reduce((s, e) => s + parseFloat(e.limite_usado), 0);
+            let pendente = total - devolvido;
+            new Chart(document.getElementById(ctxId), {
+                type: 'doughnut',
+                data: {
+                    labels: [idiomaAtual === "pt" ? "Devolvido" : "Returned", idiomaAtual === "pt" ? "Pendente" : "Pending"],
+                    datasets: [{
+                        data: [devolvido, pendente],
+                        backgroundColor: ['#27ae60', '#c0392b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // Histórico de alterações (simples, local)
+        let historico = [];
+        function registrarHistorico(acao, emprestimo) {
+            historico.push({ data: new Date().toLocaleString(), acao, emprestimo });
+            if (historico.length > 50) historico.shift();
+        }
+        // Exibir histórico (opcional: botão ou console)
+        window.mostrarHistorico = function() {
+            alert(historico.map(h => `[${h.data}] ${h.acao}: ${JSON.stringify(h.emprestimo)}`).join('\n\n'));
+        };
+
+        // Internacionalização (pt/en)
+        const textos = {
+            pt: {
+                registrar: "Registrar",
+                limpar: "Limpar Lista",
+                exportarCSV: "Exportar CSV",
+                exportarXLS: "Exportar XLS",
+                exportarPDF: "Exportar PDF",
+                backup: "Backup JSON",
+                restaurar: "Restaurar JSON",
+                imprimir: "Imprimir",
+                ajuda: "Ajuda",
+                buscar: "Buscar por nome...",
+                ordenarData: "Ordenar por Data de Saída",
+                ordenarNome: "Ordenar por Nome",
+                lista: "Lista de Empréstimos",
+                sucesso: "Empréstimo registrado com sucesso!",
+                removido: "Removido com sucesso!",
+                editado: "Edite e salve para atualizar o empréstimo.",
+                limpo: "Lista limpa com sucesso!",
+                restaurado: "Backup restaurado!",
+                backupFeito: "Backup salvo!",
+                nadaExportar: "Nada para exportar.",
+                listaVazia: "Nenhum empréstimo registrado ainda.",
+                erroNome: "Nome inválido. Use apenas letras e mínimo 3 caracteres.",
+                erroSaida: "Data de saída inválida!",
+                erroSaidaHoje: "Data de saída não pode ser anterior a hoje.",
+                erroDevolucao: "Data de devolução inválida!",
+                erroDevolucaoAntes: "Data de devolução não pode ser anterior à data de saída.",
+                erroLimite: "Limite deve ser maior que zero.",
+                erroListaVazia: "A lista já está vazia.",
+                confirmLimpar: "Tem certeza que deseja limpar toda a lista de empréstimos?",
+                confirmRemover: "Remover este empréstimo?",
+                atrasado: "Atrasado!",
+                devolucaoProxima: "Devolução próxima"
+            },
+            en: {
+                registrar: "Register",
+                limpar: "Clear List",
+                exportarCSV: "Export CSV",
+                exportarXLS: "Export XLS",
+                exportarPDF: "Export PDF",
+                backup: "Backup JSON",
+                restaurar: "Restore JSON",
+                imprimir: "Print",
+                ajuda: "Help",
+                buscar: "Search by name...",
+                ordenarData: "Sort by Start Date",
+                ordenarNome: "Sort by Name",
+                lista: "Loans List",
+                sucesso: "Loan registered successfully!",
+                removido: "Removed successfully!",
+                editado: "Edit and save to update the loan.",
+                limpo: "List cleared successfully!",
+                restaurado: "Backup restored!",
+                backupFeito: "Backup saved!",
+                nadaExportar: "Nothing to export.",
+                listaVazia: "No loans registered yet.",
+                erroNome: "Invalid name. Use only letters and at least 3 characters.",
+                erroSaida: "Invalid start date!",
+                erroSaidaHoje: "Start date cannot be before today.",
+                erroDevolucao: "Invalid return date!",
+                erroDevolucaoAntes: "Return date cannot be before start date.",
+                erroLimite: "Limit must be greater than zero.",
+                erroListaVazia: "The list is already empty.",
+                confirmLimpar: "Are you sure you want to clear the entire loan list?",
+                confirmRemover: "Remove this loan?",
+                atrasado: "Overdue!",
+                devolucaoProxima: "Return soon"
+            }
+        };
+        let idiomaAtual = "pt";
+        function traduzir() {
+            document.querySelector('button[type="submit"]').textContent = textos[idiomaAtual].registrar;
+            document.getElementById('limparLista').textContent = textos[idiomaAtual].limpar;
+            document.getElementById('exportarXLS').textContent = textos[idiomaAtual].exportarXLS;
+            document.getElementById('exportarPDF').textContent = textos[idiomaAtual].exportarPDF;
+            document.getElementById('ajuda').textContent = textos[idiomaAtual].ajuda;
+            document.getElementById('filtroNome').placeholder = textos[idiomaAtual].buscar;
+            document.getElementById('ordenarPor').options[0].text = textos[idiomaAtual].ordenarData;
+            document.getElementById('ordenarPor').options[1].text = textos[idiomaAtual].ordenarNome;
+            document.getElementById('listaTitulo').textContent = textos[idiomaAtual].lista;
+        }
+        document.getElementById('idioma').onchange = function() {
+            idiomaAtual = this.value;
+            traduzir();
+            atualizarLista();
+        };
+        traduzir();
+
+        document.getElementById('formEmprestimo').onsubmit = function (event) {
+            event.preventDefault();
+            const nome = document.getElementById('nome').value.trim();
+            const data_saida = document.getElementById('data_saida').value.trim();
+            const data_devolucao = document.getElementById('data_devolucao').value.trim();
+            const limite_usado = parseFloat(document.getElementById('limite_usado').value);
+            const observacoes = document.getElementById('observacoes').value.trim();
+
+            if (!validarNome(nome)) {
+                mostrarMensagem("Nome inválido. Use apenas letras e mínimo 3 caracteres.", "erro");
+                document.getElementById('nome').focus();
+                return;
+            }
+            if (!validarData(data_saida)) {
+                mostrarMensagem("Data de saída inválida!", "erro");
+                document.getElementById('data_saida').focus();
+                return;
+            }
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+            const dataSaidaDate = dataParaDate(data_saida);
+            if (dataSaidaDate < hoje) {
+                mostrarMensagem("Data de saída não pode ser anterior a hoje.", "erro");
+                document.getElementById('data_saida').focus();
+                return;
+            }
+            if (!validarData(data_devolucao)) {
+                mostrarMensagem("Data de devolução inválida!", "erro");
+                document.getElementById('data_devolucao').focus();
+                return;
+            }
+            const dataDevolucaoDate = dataParaDate(data_devolucao);
+            if (dataDevolucaoDate < dataSaidaDate) {
+                mostrarMensagem("Data de devolução não pode ser anterior à data de saída.", "erro");
+                document.getElementById('data_devolucao').focus();
+                return;
+            }
+            if (isNaN(limite_usado) || limite_usado <= 0) {
+                mostrarMensagem("Limite deve ser maior que zero.", "erro");
+                document.getElementById('limite_usado').focus();
+                return;
+            }
+            listaEmprestimos.push({ nome, data_saida, data_devolucao, limite_usado, observacoes, status: "Pendente" });
+            registrarHistorico("Adicionado", { nome, data_saida, data_devolucao, limite_usado, observacoes, status: "Pendente" });
+            salvarLocal();
+            atualizarLista();
+            this.reset();
+            document.getElementById('nome').style.borderColor = "#b0b0b0";
+            document.getElementById('data_saida').style.borderColor = "#b0b0b0";
+            document.getElementById('data_devolucao').style.borderColor = "#b0b0b0";
+            document.getElementById('limite_usado').style.borderColor = "#b0b0b0";
+            mostrarMensagem("Empréstimo registrado com sucesso!", "sucesso");
+        };
+
+        document.getElementById('limparLista').onclick = function() {
+            if (listaEmprestimos.length === 0) {
+                mostrarMensagem("A lista já está vazia.", "erro");
+                return;
+            }
+            if (confirm("Tem certeza que deseja limpar toda a lista de empréstimos?")) {
+                listaEmprestimos.length = 0;
+                salvarLocal();
+                atualizarLista();
+                mostrarMensagem("Lista limpa com sucesso!", "sucesso");
+            }
+        };
+
+        // Editar empréstimo
+        window.editarEmprestimo = function(idx) {
+            const e = listaEmprestimos[idx];
+            document.getElementById('nome').value = e.nome;
+            document.getElementById('data_saida').value = e.data_saida;
+            document.getElementById('data_devolucao').value = e.data_devolucao;
+            document.getElementById('limite_usado').value = e.limite_usado;
+            document.getElementById('observacoes').value = e.observacoes || "";
+            // Remove o antigo e salva ao submeter
+            listaEmprestimos.splice(idx, 1);
+            salvarLocal();
+            atualizarLista();
+            mostrarMensagem("Edite e salve para atualizar o empréstimo.", "sucesso");
+        };
+
+        // Remover empréstimo
+        window.removerEmprestimo = function(idx) {
+            if (confirm("Remover este empréstimo?")) {
+                registrarHistorico("Removido", listaEmprestimos[idx]);
+                listaEmprestimos.splice(idx, 1);
+                salvarLocal();
+                atualizarLista();
+                mostrarMensagem("Removido com sucesso!", "sucesso");
+            }
+        };
+
+        // Alternar status devolvido/pendente
+        window.alternarStatus = function(idx) {
+            let e = listaEmprestimos[idx];
+            e.status = (e.status === "Devolvido") ? "Pendente" : "Devolvido";
+            registrarHistorico("Status alterado", e);
+            salvarLocal();
+            atualizarLista();
+        };
+
+        atualizarLista();
+        atualizarGrafico();
+    </script>
+</body>
+</html>
